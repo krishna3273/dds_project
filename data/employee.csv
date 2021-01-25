@@ -1,0 +1,16 @@
+Employee_id,Name,Salary,Gender,Location,Contact_Number
+1,krishna,1000,M,Hyderabad,123456
+2,mahesh,2000,M,Banglore,654321
+3,teja,3000,M,Chennai,567890
+4,emp-1,2500,F,Hyderabad,123457
+5,emp-2,1500,M,Banglore,123458
+6,emp-3,3500,M,Hyderabad,123459
+7,emp-4,4500,F,Chennai,123467
+8,emp-5,5000,M,Banglore,123468
+9,emp-6,6000,M,Hyderabad,123478
+10,emp-7,7500,F,Hyderabad,123489
+11,emp-8,2500,F,Banglore,123495
+12,emp-9,1500,M,Hyderabad,433457
+13,emp-10,3500,M,Chennai,512457
+14,emp-11,5000,F,Hyderabad,128457
+15,emp-12,6000,F,Banglore,213457
