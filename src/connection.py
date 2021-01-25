@@ -11,16 +11,22 @@ SSH_PASS = "iiit123"
 DB_HOST = "127.0.0.1"
 
 class DB():
-    def _init_(self):
+    def __init__(self, config):
         self.cursor = None
         self.conn = None
-        pass
+        self.HOST = config["HOST"]
+        self.PORT = config["PORT"]
+        self.SSH_PASS = config["SSH_PASS"]
+        self.SSH_UNAME = config["SSH_UNAME"]
+        self.DB_HOST = config["DB_HOST"]
+        self.USER = config["USER"]
+        self.PASSWORD = config["PASSWORD"]
 
     def connect(self):
-        tunnel = SSHTunnelForwarder((HOST, PORT), ssh_password=SSH_PASS, ssh_username=SSH_UNAME,
-             remote_bind_address=(DB_HOST, 3306))
+        tunnel = SSHTunnelForwarder((self.HOST, self.PORT), ssh_password=self.SSH_PASS, ssh_username=self.SSH_UNAME,
+             remote_bind_address=(self.DB_HOST, 3306))
         tunnel.start()
-        conn = pymysql.connect(host='127.0.0.1', user=USER, passwd=PASSWORD, port=tunnel.local_bind_port)
+        conn = pymysql.connect(host='127.0.0.1', user=self.USER, passwd=self.PASSWORD, port=tunnel.local_bind_port)
         self.cursor = conn.cursor()
         self.conn = conn
 
@@ -41,8 +47,3 @@ class DB():
         except:
             pass
 
-db = DB()
-db.connect()
-db.exec("SHOW DATABASES;")
-db.exec("USE  Zoo;")
-db.close_connection()
