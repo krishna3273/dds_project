@@ -32,10 +32,10 @@ class DB():
 
     def exec(self, query):
         self.cursor.execute(query)
-        row = self.cursor.fetchone()
-        while row is not None:
-            print(row)
-            row = self.cursor.fetchone()
+        # row = self.cursor.fetchone()
+        # while row is not None:
+        #     print(row)
+        #     row = self.cursor.fetchone()
 
     def close_cursor(self):
         self.cursor.close()
