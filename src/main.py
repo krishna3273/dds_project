@@ -1,4 +1,4 @@
-from database import DB
+from Executor.database import DB
 from populate import *
 from Parser.parse import Parser
 
@@ -23,7 +23,12 @@ def populate(db):
 
 def main():
     db = DB(config = config)
-    parser = Parser(config)
-    parser.parse("select losition from staff, branch where (NOT(b.Position= 'manag') AND (b.Position='manager' OR b.Position='assistant') AND NOT(b.Position='assistant')OR(b.BID=s.SID AND s.Name='Ali')) ")
+    parser = Parser(config, None)
+    sql_test = "SELECT E.Lname FROM EMPLOYEE E, WORKS_ON W, PROJECT P WHERE P.Pname = 'Aquarius' AND P.Pnumber = W.Pno AND E.Ssn=W.Ssn AND E.Bdate = '1957-12-31'"
+    sql2 = "select Position from staff, branch where (NOT(Position= 'manager') AND (Position='manager' OR Position='assistant') AND NOT(Position='assistant')OR(BID=SID AND Name='Ali')) "
+    # sql3 = "INSERT INTO METADATA VALUES ('Employee', 'Doctor')"
+    sql3 = "SELECT EMP.Ename FROM EMP, ASG, PROJ WHERE PROJ.PNO=ASG.PNO AND PROJ.PNAME = 'Instrumentation' AND EMP.ENO = ASG.ENO"
+    sql1 = "SELECT * FROM PROJ, ASG WHERE PROJ.PNO=ASG.PNO AND PROJ.PNO='P4'"
+    parser.parse(sql_test)
 if __name__ == "__main__" :
     main()

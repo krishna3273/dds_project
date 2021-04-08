@@ -1,5 +1,6 @@
 import sqlparse
-from sqlparse.tokens import Keyword
+from sqlparse.tokens import Keyword, Whitespace, DML, DDL
+from sqlparse.sql import Identifier, Token, IdentifierList, Statement
 import moz_sql_parser
 import boolean
 import expression
@@ -8,21 +9,39 @@ from tree import *
 
 class Parser():
 
-    def __init__(self, config):
+    def __init__(self, config, schema):
         self.config = config
+        self.alias_tables = {}
+        self.schema = schema
 
     def parse(self, raw):
         statement = sqlparse.split(raw)[0]
         parsed = sqlparse.parse(statement)[0]
         self.parsed = parsed
-        print(parsed.tokens)
-        self.where = parsed[-1]
+
+        self.query_type = Statement(parsed.tokens).get_type()
+        if(parsed.tokens[0].ttype == DML):
+            self.query_type = "SELECT"
+        else:
+            self.query_type = "INSERT"
+
+        self.columns = self.get_column_names()
+        self.tables = self.extract_tables(parsed)
+        if(self.query_type == "SELECT"):
+            self.where = parsed[-1]
+
         self.expr_dict = {}
         self.get_tree()
 
-    def perform_decomposition(self, parsed):
-        where = parsed.tokens[-1]
-
+    def get_column_names(self):
+        ch_list = False
+        stmt = None
+        for tok in self.parsed.tokens:
+            if(tok.ttype != Whitespace and tok.ttype != DML):
+                stmt = tok.value
+                break
+        columns = stmt.split(", ")
+        return columns
 
     def normalize(self, where):
         booleans = ['NOT', 'OR', 'AND']
@@ -33,8 +52,9 @@ class Parser():
 
         # Extract expressions
         for token in where.flatten():
+
             tok = str(token)
-            if(tok == " "):
+            if(tok == " " or tok == ";" or tok.upper() == "WHERE"):
                 continue
             if((tok not in booleans) and (tok not in parenthesis)):
                 temp += tok
@@ -51,7 +71,7 @@ class Parser():
         vari = "x_"
         for token in where.flatten():
             tok = str(token)
-            if (tok == " "):
+            if(tok == " " or tok == ";" or tok.upper() == "WHERE"):
                 continue
             if((tok not in booleans) and (tok not in parenthesis)):
                 temp += tok
@@ -74,7 +94,7 @@ class Parser():
         fin_string = ""
         for charac in normalized:
             tok = charac
-            if (tok == " "):
+            if(tok == " " or tok == ";" or tok.upper() == "WHERE"):
                 continue
             if((tok not in bool_ops) and (tok not in parenthesis)):
                 temp += tok
@@ -104,31 +124,15 @@ class Parser():
         for tname in lot:
             if(isinstance(tname, sqlparse.sql.Identifier)):
                 tables.append(tname.get_name())
+                self.alias_tables[tname.get_alias()] = tname.get_real_name()
+
         return tables
 
     def get_tree(self):
-        tables = self.extract_tables(self.parsed)
-        leaf_nodes = []
-        for table in tables:
-            leaf_nodes.append(Node(table))
-
-        ops = ['&', '|', '~']
-        pars = ['(', ')']
         normalized, expressions = self.normalize(self.where)
-        temp = ""
-
-        # for tok in normalized:
-        #     if(tok == " " or tok == ""):
-        #         continue
-        #     if(tok not in ops and tok not in pars):
-        #         temp += tok
-        #     else:
-        #         if(temp[0] == '~'):
-        #             expr = self.transform(self.expr_dict[temp[1:]])
-        #         else:
-        #             expr = self.expr_dict[temp]
-
-
+        tree = Tree(self.get_column_names(), self.tables, normalized, expressions, self.schema)
+        tree.print_tree(tree.root_node)
+        tree.apply_rules(tree.root_node)
 
 
 
